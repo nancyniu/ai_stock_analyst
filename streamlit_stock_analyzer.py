@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import yfinance as yf
+
+from finvizfinance.quote import finvizfinance
+from finvizfinance.screener.overview import Overview
 from datetime import datetime, timedelta
 
 def initialize_session_state():
@@ -12,22 +15,21 @@ def initialize_session_state():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-def get_sp500_symbols():
-    """Get list of S&P 500 stocks for scanning"""
+def get_screener_symbols():
+    """Get list of stocks for finviz scanner API"""
     # In a real application, you would implement your preferred method
     # of getting stock symbols (e.g., from an API or database)
     # This is a placeholder with some example stocks
-    return ["AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA"]
-
-def get_stock_data(symbol, period='1d'):
-    """Fetch stock data using yfinance"""
-    try:
-        stock = yf.Ticker(symbol)
-        hist = stock.history(period=period)
-        return hist
-    except Exception as e:
-        st.error(f"Error fetching data for {symbol}: {str(e)}")
-        return None
+    foverview = Overview()
+    filters_dict = {'Gap': 'Up 4%',
+                    'Relative Volume': 'Over 2',
+                    'Price': 'Over $5',
+                    'Average Volume': 'Over 100K'}
+    
+    foverview.set_filter(filters_dict=filters_dict)
+    df = foverview.screener_view()
+    #list_stock = df['Ticker'].values.tolist()
+    return df
 
 def identify_gaps(df):
     """Identify price gaps in stock data"""
@@ -41,11 +43,11 @@ def analyze_stock(symbol):
     
     # Get historical data
     hist = stock.history(period='1y')
-    
+
     # Basic statistics
     analysis = {
-        'current_price': hist['Close'][-1],
-        'daily_change': ((hist['Close'][-1] - hist['Close'][-2]) / hist['Close'][-2] * 100),
+        'current_price': hist['Close'].iloc[-1],
+        'daily_change': ((hist['Close'].iloc[-1] - hist['Close'].iloc[-2]) / hist['Close'].iloc[-2] * 100),
         '52w_high': hist['High'].max(),
         '52w_low': hist['Low'].min(),
         'volume_avg': hist['Volume'].mean(),
@@ -65,48 +67,24 @@ def main():
     
     with left_column:
         # Gap Scanner Section
-        with st.expander("Gap Scanner", expanded=True):
-            st.subheader("Gap Scanner")
-            
-            gap_threshold = st.slider("Gap Threshold (%)", 1.0, 10.0, 3.0)
-            
-            if st.button("Gap Strategy"):
-                symbols_list = get_sp500_symbols()  # Automatically get stocks to scan
-                results = []
+        with st.expander('Strategies', expanded=True):
+            if st.button("Gap Up"):
+                df = get_screener_symbols()  # Automatically get stocks to scan
+                st.write(df)
                 
-                with st.spinner("Scanning for gaps..."):
-                    for symbol in symbols_list:
-                        data = get_stock_data(symbol)
-                        if data is not None:
-                            data = identify_gaps(data)
-                            significant_gaps = data[abs(data['gap_percent']) > gap_threshold]
-                            
-                            if not significant_gaps.empty:
-                                results.append({
-                                    'symbol': symbol,
-                                    'gaps': significant_gaps
-                                })
-                
-                st.session_state.analysis_results = results
-                
-                if results:
-                    for result in results:
-                        st.subheader(f"Gaps for {result['symbol']}")
-                        st.dataframe(result['gaps'][['Open', 'Close', 'gap', 'gap_percent']])
-                else:
-                    st.info("No significant gaps found for the given threshold.")
+                st.session_state.analysis_results = df
         
         # Deep Dive Analysis Section
-        with st.expander("Deep Dive Analysis", expanded=True):
-            st.subheader("Deep Dive Analysis")
-            
+        with st.expander("Deep Dive", expanded=True):
             symbol = st.text_input("Enter stock symbol for deep dive", "AAPL")
             
             if st.button("Analyze Stock"):
                 with st.spinner(f"Analyzing {symbol}..."):
                     analysis, hist_data = analyze_stock(symbol)
-                    
+                    #st.write(analysis)
+                    #st.write(hist_data)
                     # Display analysis results in columns
+                   
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         st.metric("Current Price", f"${analysis['current_price']:.2f}")
@@ -123,7 +101,7 @@ def main():
                     
                     # Display volume chart
                     st.bar_chart(hist_data['Volume'])
-    
+                    
     with right_column:
         # AI Chat Analysis Section
         st.subheader("AI Chat Analysis")
