@@ -6,6 +6,11 @@ from finvizfinance.quote import finvizfinance
 from finvizfinance.screener.overview import Overview
 from datetime import datetime, timedelta
 
+from lightweight_charts.widgets import StreamlitChart
+
+
+
+st.set_page_config(layout="wide")
 
 def initialize_session_state():
     """Initialize session state variables"""
@@ -29,7 +34,6 @@ def get_screener_symbols():
 
     #list_stock = df['Ticker'].values.tolist()
     return df
-
 
 def analyze_stock(symbol):
     """Perform deep dive analysis on a single stock"""
@@ -83,8 +87,14 @@ if st.button("Go", type="primary"):
                 st.metric("Avg Volume", f"{analysis['volume_avg']:,.0f}")
                 st.metric("Volatility", f"{analysis['volatility']:.2f}%")
                         
+            chart = StreamlitChart(width=900, height=600)
+
+            chart.set(hist_data)
+
+            chart.load()
+
             # Display price chart
-            st.line_chart(hist_data['Close'])
+            #st.line_chart(hist_data['Close'])
                         
             # Display volume chart
-            st.bar_chart(hist_data['Volume'])
+            #st.bar_chart(hist_data['Volume'])
