@@ -2,11 +2,29 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 
+from phi.agent import Agent, RunResponse
+#from dotenv import load_dotenv
+from phi.model.groq import Groq
+from phi.model.anthropic import Claude
+
+from phi.tools.yfinance import YFinanceTools
+
 from finvizfinance.quote import finvizfinance
 from finvizfinance.screener.overview import Overview
 from datetime import datetime, timedelta
 
 from lightweight_charts.widgets import StreamlitChart
+
+
+#load_dotenv()
+
+agent = Agent(
+    model=Groq(id="llama-3.3-70b-versatile"),
+    tools=[YFinanceTools(stock_price=True, analyst_recommendations=True, stock_fundamentals=True, company_news=True)],
+    show_tool_calls=True,
+    markdown=True,
+    instruction=["Use tables to display data when possible."],
+)
 
 st.set_page_config(layout="wide")
 
@@ -29,7 +47,11 @@ def get_screener_symbols():
 def analyze_stock(symbol):
     """Perform deep dive analysis on a single stock"""
     stock = yf.Ticker(symbol)
-    news = stock.get_news()
+
+    #news = stock.get_news()
+    
+    response: RunResponse = agent.run(f"Please summarize the corporate financial of {symbol} and summarize any news that may impact the stock price", stream=False, markdown=False)
+
     # Get historical data
     hist = stock.history(period='1y')
 
@@ -42,7 +64,7 @@ def analyze_stock(symbol):
         'volume_avg': hist['Volume'].mean(),
         'volatility': hist['Close'].pct_change().std() * 100
     }
-    return analysis, hist, news
+    return analysis, hist, response
 
 def intialize():
     st.session_state.myselect = 0
@@ -89,8 +111,9 @@ elif st.session_state.myselect == 1:
             with st.spinner(f"Analyzing {symbol}..."):
                 analysis, hist_data, news = analyze_stock(symbol)
                 st.write(f"Summary of {company}...")
-                for title in news:
-                    st.write(title['content']['title'])
+                #for title in news:
+                #    st.write(title['content']['title'])
+                st.write(news.content)
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.metric("Current Price", f"${analysis['current_price']:.2f}")
