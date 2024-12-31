@@ -3,7 +3,7 @@ import pandas as pd
 import yfinance as yf
 
 from phi.agent import Agent, RunResponse
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 from phi.model.groq import Groq
 from phi.model.anthropic import Claude
 
@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from lightweight_charts.widgets import StreamlitChart
 
 
-#load_dotenv()
+load_dotenv()
 
 agent = Agent(
     model=Groq(id="llama-3.3-70b-versatile"),

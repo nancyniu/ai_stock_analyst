@@ -3,5 +3,5 @@ pandas
 yfinance
 finvizfinance
 lightweight-charts
-phi
+phidata
 groq
