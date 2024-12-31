@@ -5,3 +5,4 @@ finvizfinance
 lightweight-charts
 phidata
 groq
+anthropic
