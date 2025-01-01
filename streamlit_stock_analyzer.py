@@ -3,7 +3,7 @@ import pandas as pd
 import yfinance as yf
 
 from phi.agent import Agent, RunResponse
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 from phi.model.groq import Groq
 from phi.model.anthropic import Claude
 
@@ -19,6 +19,7 @@ from lightweight_charts.widgets import StreamlitChart
 #model=Claude(id="claude-3-5-sonnet-20240620"),
 #model=Groq(id="llama-3.3-70b-versatile"),
 #model=Groq(id="claude-3-5-haiku-20241022"),
+
 agent = Agent(
     model=Claude(id="claude-3-5-sonnet-20240620"),
     tools=[YFinanceTools(stock_price=True, analyst_recommendations=True, stock_fundamentals=True, company_news=True)],
