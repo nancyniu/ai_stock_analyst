@@ -15,7 +15,6 @@ from datetime import datetime, timedelta
 
 from lightweight_charts.widgets import StreamlitChart
 
-
 #load_dotenv()
 
 agent = Agent(
