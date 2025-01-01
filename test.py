@@ -5,7 +5,7 @@ import yfinance as yf
 from phi.agent import Agent, RunResponse
 from dotenv import load_dotenv
 from phi.model.groq import Groq
-from phi.model.anthropic import Claude
+#from phi.model.anthropic import Claude
 
 from phi.tools.yfinance import YFinanceTools
 
