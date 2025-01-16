@@ -1,2 +1,2 @@
 # ai_stock_assistant
-Quick prototype of AI stock analyst assistant using LLM
+test AI stock analyst assistant using LLMs
