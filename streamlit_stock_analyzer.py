@@ -21,8 +21,8 @@ from lightweight_charts.widgets import StreamlitChart
 #model=Groq(id="claude-3-5-haiku-20241022"),
 
 agent = Agent(
-    model=Claude(id="claude-3-5-sonnet-20240620"),
-##    model=Groq(id="llama-3.3-70b-versatile"),
+##    model=Claude(id="claude-3-5-sonnet-20240620"),
+    model=Groq(id="llama-3.3-70b-versatile"),
     tools=[YFinanceTools(stock_price=True, analyst_recommendations=True, stock_fundamentals=True, company_news=True)],
     show_tool_calls=True,
     markdown=True,
